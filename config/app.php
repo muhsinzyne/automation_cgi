@@ -13,6 +13,10 @@ return [
     |
     */
 
+    'w_version' => env('W_VERSION', ''),
+    'w_phone_number_id' => env('W_PHONE_NUMBER_ID', ''),
+    'w_token' => env('W_TOKEN', ''),
+
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
