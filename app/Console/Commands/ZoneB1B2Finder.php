@@ -71,45 +71,55 @@ class ZoneB1B2Finder extends Command
 
 
             $b1b2After = $responseList[$meta['b1b2']];
-            $dateTime = new DateTime(date('Y-m-d'));
-            $dateTime->modify("+$b1b2After days");
-            $earliestDate = $dateTime->format('M d Y');
+            $earlierDateTime = new DateTime(date('Y-m-d'));
+            $earlierDateTime->modify("+$b1b2After days");
+            $earliestDate = $earlierDateTime->format('M d Y');
 
+            $currentDate = new DateTime($notification->current_date);
 
+            if($earlierDateTime < $currentDate) {
+                $params = [
+                    'messaging_product' => "whatsapp",
+                    'to' => $notification->mobile,
+                    'type' => 'template',
+                    'template' => [
+                        'name' => $notification->zoneData->template_id,
+                        'language' => [
+                            'code' => 'en_US'
+                        ],
+                        'components' => [
+                            [
+                                'type' => 'body',
+                                'parameters' => [
+                                    [
+                                        'type' => 'text',
+                                        'text' => $b1b2After,
 
+                                    ],
+                                    [
+                                        'type' => 'text',
+                                        'text' => $earliestDate,
 
-            $params = [
-                'messaging_product' => "whatsapp",
-                'to' => $notification->mobile,
-                'type' => 'template',
-                'template' => [
-                    'name' => $notification->zoneData->template_id,
-                    'language' => [
-                        'code' => 'en_US'
-                    ],
-                    'components' => [
-                        [
-                            'type' => 'body',
-                            'parameters' => [
-                                [
-                                    'type' => 'text',
-                                    'text' => $b1b2After,
-
-                                ],
-                                [
-                                    'type' => 'text',
-                                    'text' => $earliestDate,
-
+                                    ]
                                 ]
                             ]
                         ]
                     ]
-                ]
 
-            ];
-            $requestUrl = "https://graph.facebook.com/$version/$phoneNumberID/messages";
-            $response = Http::withHeaders($headers)->post($requestUrl, $params);
-            Log::channel('stderr')->error("Notified User $notification->mobile for date of  $earliestDate ");
+                ];
+                $requestUrl = "https://graph.facebook.com/$version/$phoneNumberID/messages";
+                $response = Http::withHeaders($headers)->post($requestUrl, $params);
+                Log::channel('stderr')->error("Notified User $notification->mobile for date of  $earliestDate ");
+            } else {
+                Log::channel('stderr')->error("Skipped $notification->mobile for date of  $earliestDate ");
+
+            }
+
+
+
+
+
+
 
         }
     }
